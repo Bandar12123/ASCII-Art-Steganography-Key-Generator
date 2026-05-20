@@ -1,19 +1,97 @@
-ASCII Art Steganography & Key GeneratorA lightweight systems-level tool written in C that maps files (such as PDFs, binaries, or text documents) into a visually structured $32 \times 32$ matrix. By leveraging C Bit-fields, Unions, and Bitwise XOR operations, the program translates raw binary bytes into dynamic ASCII art with ANSI terminal colors, functioning as a unique visual cryptographic signature ("fingerprint") of any file.The program operates in two distinct modes: Generation (-g) to create a custom key visualization from a file, and Comparison (-c) to verify a previously generated key against a target file.Technical FeaturesBit-Field Memory Mapping: Deconstructs a single byte (8 bits) into distinct rendering properties without overhead:visibility (1 bit) $\rightarrow$ Determines if a character is rendered or left as a blank space.color (3 bits) $\rightarrow$ Maps to 8 distinct ANSI foreground terminal colors.background (1 bit) $\rightarrow$ Toggles custom background color styles.symbol (3 bits) $\rightarrow$ Indexes into an array of 8 distinct ASCII characters (., |, /, #, !, ,, <, >).In-Place XOR Cipher: Blends a predefined, highly entropy-dense random key matrix with the target file's stream, ensuring a highly unique structural visualization for every different file content.Command-Line Interface: Implements fully flexible argument processing (argc/argv) to easily manipulate paths dynamically directly from the Linux Terminal.How It Works (Architecture)[Raw File Stream] ---> [Read Byte by Byte]
-                             |
-                             v
-               [XOR with Predefined Key Matrix]
-                             |
-                             v
-               [Map 8 Bits via custom Union]
-         +------------+------------+---------------+----------+
-         | Symbol (3b)| BG Toggle(1b)| Color Code (3b)| Vis (1b) |
-         +------------+------------+---------------+----------+
-                             |
-                             v
-                [Render 32x32 Colored ASCII Art]
-Installation & CompilationSince the program utilizes native terminal escape sequences for printing colors, it runs natively inside any standard Linux Terminal environment (e.g., Ubuntu).Compile the program using gcc:Bashgcc 03.c -o key_engine
-Usage GuideThe compiled binary expects specific command-line arguments to dictate the operational state.1. Key Generation Mode (-g)Reads a target file, mutates the static matrix using a bitwise XOR operation against the file bytes, displays the resulting ASCII art directly on the screen, and writes the raw matrix payload out into a .key file.Syntax:Bash./key_engine -g <target_file>
-Example:Bash./key_engine -g sample.pdf
-Outputs a visual frame to the terminal and saves a binary file called sample.pdf.key.2. Comparison & Verification Mode (-c)Reads a file alongside a previously saved .key file. It regenerates the visualization dynamically from the file, matches it byte-for-byte against the stored key, and reports if the file signature remains authentic.Syntax:Bash./key_engine -c <target_file> <saved_key_file>
-Example:Bash./key_engine -c sample.pdf sample.pdf.key
-Critical Code Fixes AppliedTo ensure high reliability and eliminate undefined crashes, the following runtime bugs were resolved within the implementation structure:Deterministic State Synchronization (cmp_keys): The local index variables i and j in the key matching validation loop are now safely zero-initialized (unsigned char i = 0, j = 0;). This prevents random memory leftovers from causing illegal address space lookups (Segmentation Faults).Safe Memory Boundaries (main Argument Checking): Implemented strict parameter threshold validations on argc when switching context execution to execution branch -c. This guarantees that if a user misses providing the mandatory third argument (argv[3] for the key path), the program exits elegantly with an error message instead of dereferencing a NULL pointer.
+# ASCII Art Steganography & Key Generation Engine
+
+A sophisticated systems-level tool written in C that transforms digital files (such as PDFs, raw binaries, or text documents) into a visually structured 32x32 cryptographic matrix. 
+
+By taking full advantage of powerful low-level C features like **Bit-fields**, **Unions**, and **Bitwise XOR operations**, the engine deconstructs raw binary byte streams directly in memory. It maps them dynamically into an ANSI-colored ASCII art framework rendered straight onto the terminal screen, generating a unique, visual cryptographic signature (Visual Cryptographic Signature) for any file processed.
+
+The application executes natively in two strict operational modes:
+1. **Generation Mode (-g):** Processes a target file, mutates the predefined cipher matrix, prints the visual grid, and exports the payload as a standalone key file.
+2. **Comparison Mode (-c):** Dynamically regenerates the visual structure of a file and matches it byte-for-byte against a previously saved key file to verify content integrity.
+
+---
+
+## Technical Features
+
+* **Memory-Optimized Bit-Field Mapping:** Safely slices a single raw byte (8 bits) into precise graphical attributes instantly within the hardware register space, avoiding memory overhead:
+  * `visibility` (1 bit) -> Decides if a character is drawn or skipped as a structural blank space.
+  * `color` (3 bits) -> Generates 8 configurations mapping directly to terminal ANSI foreground paint codes.
+  * `background` (1 bit) -> Flags a specialized background display style modifier.
+  * `symbol` (3 bits) -> Indexes a static look-up array pointing to 8 distinct structural ASCII chars: `.`, `|`, `/`, `#`, `!`, `,`, `<`, or `>`.
+
+* **In-Place XOR Cipher Integration:** Blends your predefined high-entropy random matrix with the incoming document bytes bitwise, creating an entirely customized layout for every distinct file state.
+
+* **Native CLI Input Processing:** Features strict parsing of standard terminal arguments (`argc` / `argv`) to accept variable path entries cleanly at runtime without requiring hardcoded static strings.
+
+---
+
+## Architecture & Data Flow
+
+[Raw File Stream Entry] ---> [Byte-by-Byte Sequential Read]
+|
+v
+[Bitwise XOR Fusion with Cipher Matrix]
+|
+v
+[Deconstruction via Custom Union Definition]
++------------+------------+---------------+----------+
+| Symbol (3b)|   BG (1b)  |   Color (3b)  | Vis (1b) |
++------------+------------+---------------+----------+
+|
+v
+[Render 32x32 Colored Art Frame to Terminal]
+
+
+---
+
+## Compilation & System Requirements
+
+Because the runtime code heavily relies on native bash escape sequences to render colorized terminal boards, it is fully optimized to execute out-of-the-box in any standard Linux terminal emulator (e.g., Ubuntu).
+
+Compile the source tree clean using `gcc`:
+
+```bash
+gcc 03.c -o key_engine
+
+Usage Guide
+
+The compiled binary evaluates specific command-line arguments flags passed into the interpreter vector to route program execution:
+1. Key Generation and Export Mode (-g)
+
+Scans the user-supplied document, processes the matrix values in place, displays the corresponding block-graphics layout, and pushes the binary footprint to an external .key asset.
+
+    Syntax Pattern:
+
+Bash
+
+./key_engine -g <target_file_path>
+
+    Execution Example:
+
+Bash
+
+./key_engine -g sample.pdf
+
+Renders the file's visual signature to the active shell window and generates an authentication token named sample.pdf.key.
+2. Matching and Verification Mode (-c)
+
+Pulls a target document together with its historical key record. It rebuilds the active evaluation matrix on-the-fly and tests it against the reference key data, reporting whether the file layout matches perfectly or has been altered.
+
+    Syntax Pattern:
+
+Bash
+
+./key_engine -c <target_file_path> <reference_key_file>
+
+    Execution Example:
+
+Bash
+
+./key_engine -c sample.pdf sample.pdf.key
+
+Implemented Stability Upgrades
+
+To secure deterministic memory lookups and actively isolate the executable from kernel-level crash signals, the following architecture refinements were introduced:
+
+    State Initialization Safety (cmp_keys): The isolated evaluation counters i and j in the key matching validation routine have been properly zero-initialized (unsigned char i = 0, j = 0;). This prevents unallocated garbage memory stack positions from feeding unmanaged offset indices into the loop, completely eliminating unmapped pointer exceptions (Segmentation Faults).
+
+    Interpreter Vector Protections (main Boundary Checking): Structured explicit defensive guard conditions verifying argc capacity before jumping execution into the -c logical module. This safeguards operations so that if a shell operator skips passing the mandatory key descriptor (argv[3]), the application throws an elegant exit code warning instead of forcing the CPU to read a NULL memory pointer.
